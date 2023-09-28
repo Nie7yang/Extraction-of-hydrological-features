@@ -1,7 +1,7 @@
 
     !*******************  2023.9  聂启阳 北海道大学  ******************
-
-    module model0                        !@@@@@模块置于引用之前编译
+    !采用了递归，所以Debug模式下可能导致栈溢出或内存访问错误：1.可切换至Release状态编译。2.Stack Reserve Size设置较大数值。
+    module model0                        
 
     integer,allocatable  ::  dir(:,:),basin(:,:)
     integer ::hang,lie
@@ -10,7 +10,7 @@
     program basinpress
     use model0
     implicit none
-    integer i,j,x3,y3
+    integer i,j,x3,y3,nodata
     real(kind=8) x0, y0, GC, x1, y1, x2, y2
     character DATE
     character(len=30) DATE1,DATE2,DATE3,DATE4,DATE5,DATE6
@@ -35,7 +35,7 @@
     read (222,*) DATE,x0    !左下角x
     read (222,*) DATE,y0
     read (222,*) DATE,GC	!网格尺寸
-    read (222,*)
+    read (222,*) DATE,nodata
 
     x2=(x1-x0)/GC
     y2=(y1-y0)/GC
@@ -47,7 +47,7 @@
     read (222,*) dir
     !********************************  计算basin  **************************************
 
-    basin=-9999
+    basin=nodata
     call GetBasin(x3,y3)
 
     !********************************  计算结束  **************************************
@@ -60,7 +60,7 @@
     write (555,'(A30)') DATE5
     write (555,'(A30)') DATE6
     do I=1,hang
-        write (555,'(<lie>I7)') (basin(j,i),j=1,lie)
+        write (555,'(<lie>I6)') (basin(j,i),j=1,lie)
     enddo
 
     close(222)
@@ -70,8 +70,7 @@
     read(*,*)
     end program
     
-    !********************************  子程序  ********************************
-    !采用了递归，所以Debug模式下可能导致栈溢出或内存访问错误，可切换至Release状态编译。
+    !********************************  子程序  *******************************
     
     recursive subroutine GetBasin(xx,yy)  !添加recursive关键字该子程序才可递归
     use model0
